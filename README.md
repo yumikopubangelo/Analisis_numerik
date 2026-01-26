@@ -5,7 +5,7 @@ This application focuses on *learning and understanding*, not just producing fin
 
 ---
 
-## 🎯 Purpose
+## Purpose
 
 This app is built to:
 - Visualize numerical methods step-by-step
@@ -15,35 +15,38 @@ This app is built to:
 
 ---
 
-## 📚 Covered Topics (Planned)
+## Covered Topics (Planned)
 
 Based on a standard Numerical Analysis syllabus:
 
-### ✅ Root Finding (Priority)
+### Root Finding (Priority)
 - Bisection Method  
 - Regula Falsi  
 - Newton–Raphson  
 - Secant Method  
 
-### 🔄 Error & Convergence Analysis
+### Error & Convergence Analysis
 - Absolute error
 - Relative error
 - Iterative error
 - Tolerance-based stopping criteria
 
-### 📈 Interpolation (Planned)
+### Interpolation (Planned)
 - Lagrange Polynomial
 - Newton Polynomial
 - Interpolation error
 
-### ➕ Future Extensions
+### Series Expansion
+- Taylor Series
+
+### Future Extensions
 - Numerical Integration (Trapezoidal, Simpson)
 - Numerical Differentiation
 - Ordinary Differential Equations (Euler, Runge–Kutta)
 
 ---
 
-## 🧠 Key Features
+## Key Features
 
 - Step-by-step iteration tables
 - Error calculation at each iteration
@@ -55,7 +58,7 @@ Based on a standard Numerical Analysis syllabus:
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 
@@ -82,7 +85,7 @@ numerical-analysis-app/
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Python**
 - **Streamlit** (Web UI)
@@ -93,7 +96,7 @@ numerical-analysis-app/
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 ### 1. Clone the repository
 ```bash
@@ -115,7 +118,7 @@ streamlit run app.py
 
 ---
 
-## ⚠️ Academic Ethics Notice
+## Academic Ethics Notice
 
 This application is intended as a **learning tool**, not a shortcut for assignments.
 
@@ -125,7 +128,7 @@ This application is intended as a **learning tool**, not a shortcut for assignme
 
 ---
 
-## 🎓 Intended Users
+## Intended Users
 
 * Undergraduate students studying Numerical Analysis
 * Beginners struggling with iterative methods
@@ -133,7 +136,7 @@ This application is intended as a **learning tool**, not a shortcut for assignme
 
 ---
 
-## 📌 Development Philosophy
+## Development Philosophy
 
 * Simple > Complex
 * Understandable > Optimized
@@ -143,14 +146,14 @@ This project prioritizes clarity, correctness, and educational value.
 
 ---
 
-## 📄 License
+## License
 
 This project is developed for educational purposes.
 Commercial use requires permission from the author.
 
 ---
 
-## ✨ Author
+## Author
 
 Developed by a student as a learning and teaching aid for Numerical Analysis.
 
