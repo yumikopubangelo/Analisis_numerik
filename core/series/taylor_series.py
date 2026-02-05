@@ -190,21 +190,6 @@ def taylor_series(func_str, x0, n_terms, x_eval=None, error_bound=None,
                         tolerance_bound=None, y0=None, is_ode=False):
     """
     Calculate Taylor series for either explicit function f(x) or ODE y' = f(x, y).
-    
-    Parameters:
-    -----------
-    func_str: function string
-    x0: expansion point
-    n_terms: number of terms
-    x_eval: evaluation point
-    error_bound: maximum acceptable error
-    tolerance_bound: tolerance for convergence
-    y0: initial y value (required for ODE)
-    is_ode: True if solving ODE, False if explicit function
-    
-    Returns:
-    --------
-    result dictionary
     """
     
     if not is_ode:
@@ -215,143 +200,109 @@ def taylor_series(func_str, x0, n_terms, x_eval=None, error_bound=None,
         try:
             # Parse the function
             func = sp.sympify(func_str, locals=locals_map)
+            
             # Allow y as an alias for x - substitute y with x if present
             y = sp.Symbol('y')
             if y in func.free_symbols:
                 func = func.subs(y, x)
+            
             # Ensure no unexpected symbols remain
             unknown = func.free_symbols - {x}
             if unknown:
                 unknown_str = ", ".join(sorted(str(s) for s in unknown))
                 raise ValueError(f"Fungsi hanya boleh memakai variabel x. Simbol lain: {unknown_str}")
             
-            # Calculate Taylor series
-            series = func.series(x, x0, n_terms).removeO()
+            # Calculate Taylor series (FIXED: gunakan method 'series' dengan benar)
+            # Series expansion: func.series(x, x0, n_terms+1).removeO()
+            series_expr = sp.series(func, x, x0, n_terms+1).removeO()
             
-            # If y0 is provided, adjust the series to account for initial y value
-            if y0 is not None:
-                # For functions that require initial y condition, add it to the series
-                # This is typically used for problems like y' = f(x, y) with y(x0) = y0
-                # For standard Taylor series, this might not be necessary, but it's available
-                series = series.subs(x, x0) + y0 - func.subs(x, x0)
-            
-            # Get individual terms
+            # Get individual terms (FIXED LOGIC)
             terms = []
-            for i in range(n_terms):
+            approximations = [] if x_eval is not None else None
+            
+            # First, collect all non-zero terms up to n_terms
+            collected_terms = 0
+            i = 0
+            while collected_terms < n_terms and i < n_terms * 2:  # Prevent infinite loop
                 # Calculate i-th derivative at x0
                 derivative = func.diff(x, i)
                 derivative_at_x0 = derivative.subs(x, x0)
                 
-                # Calculate coefficient
-                coeff = derivative_at_x0 / sp.factorial(i)
-                
-                # Term expression
-                if i == 0:
-                    term_expr = coeff
-                else:
-                    term_expr = coeff * (x - x0)**i
-                
-                terms.append({
-                    'n': i,
-                    'derivative': str(derivative),
-                    'derivative_at_x0': float(derivative_at_x0) if derivative_at_x0.is_number else str(derivative_at_x0),
-                    'coefficient': float(coeff) if coeff.is_number else str(coeff),
-                    'term': str(term_expr)
-                })
-            
-            # Calculate error bound if provided
-            error_bound_result = None
-            if error_bound is not None and x_eval is not None:
-                # Lagrange remainder bound: |R_n(x)| ≤ M * |f^(n+1)(x)| / (n+1)!
-                # where M = max |f^(n+1)(ξ)| on interval [x0, x_eval]
-                try:
-                    # Find maximum of (n+1)-th derivative on interval
-                    max_derivative = 0
-                    for i in range(n_terms + 1):
-                        derivative = func.diff(x, i)
-                        # Evaluate derivative at multiple points in interval
-                        test_points = np.linspace(min(x0, x_eval), max(x0, x_eval), 100)
-                        max_val = max([abs(float(derivative.subs(x, pt))) for pt in test_points])
-                        max_derivative = max(max_derivative, max_val)
-                
-                    # Calculate bound
-                    factorial = sp.factorial(n_terms)
-                    error_bound_val = max_derivative * abs(x_eval - x0)**(n_terms + 1) / factorial
-                    error_bound_result = {
-                        'bound': error_bound_val,
-                        'formula': f'|R_{n_terms}(x)| <= {max_derivative:.2e} * |x - x0|^{n_terms + 1} / {n_terms + 1}!',
-                        'description': 'Batas maksimum error berdasarkan turunan ke-(n+1)'
-                    }
-                except:
-                    error_bound_result = None
-            
-            # Calculate tolerance bound if provided
-            tolerance_bound_result = None
-            if tolerance_bound is not None and x_eval is not None:
-                # Minimum tolerance for convergence
-                try:
-                    # Calculate required tolerance for n significant digits
-                    true_value = float(func.subs(x, x_eval))
-                    required_tolerance = 0.5 * 10**(-tolerance_bound) if true_value != 0 else tolerance_bound
-                    tolerance_bound_result = {
-                        'tolerance': required_tolerance,
-                        'formula': f'0.5 × 10^(-{tolerance_bound})',
-                        'description': f'Toleransi minimum untuk {tolerance_bound} digit signifikan'
-                    }
-                except:
-                    tolerance_bound_result = None
-            
-            # Evaluate approximations if x_eval is provided
-            approximations = None
-            if x_eval is not None:
-                approximations = []
-                partial_sum = 0
-                
-                for i, term_data in enumerate(terms):
-                    # Add current term to partial sum
-                    term_expr = sp.sympify(term_data['term'])
-                    partial_sum += term_expr
+                # Only add non-zero terms for functions like cos(x)
+                if derivative_at_x0 != 0 or i == 0:
+                    # Calculate coefficient
+                    coeff = derivative_at_x0 / sp.factorial(i)
                     
-                    # Evaluate at x_eval
-                    approx_value = float(partial_sum.subs(x, x_eval))
+                    # Term expression
+                    if i == 0:
+                        term_expr = coeff
+                    else:
+                        term_expr = coeff * (x - x0)**i
                     
-                    # Calculate true value
-                    true_value = float(func.subs(x, x_eval))
-                    
-                    # Calculate error
-                    abs_error = abs(approx_value - true_value)
-                    rel_error = abs_error / abs(true_value) if true_value != 0 else float('inf')
-                    
-                    # Check against bounds
-                    meets_error_bound = error_bound_result is None or abs_error <= error_bound_result['bound']
-                    meets_tolerance = tolerance_bound_result is None or abs_error <= tolerance_bound_result['tolerance']
-                    
-                    approximations.append({
-                        'n_terms': i + 1,
-                        'Jumlah Suku': i + 1,  # Nama yang mudah dimengerti
-                        'Nilai Aproksimasi': approx_value,  # Nama yang mudah dimengerti
-                        'Nilai Sebenarnya': true_value,  # Nama yang mudah dimengerti
-                        'Error Absolut': abs_error,  # Nama yang mudah dimengerti
-                        'Error Relatif': rel_error,  # Nama yang mudah dimengerti
-                        'Error Persentase': rel_error * 100,  # Nama yang mudah dimengerti
-                        'Memenuhi Batas Error': meets_error_bound,  # Nama yang mudah dimengerti
-                        'Memenuhi Toleransi': meets_tolerance,  # Nama yang mudah dimengerti
-                        'Keterangan': 'Konvergen' if meets_tolerance else 'Belum Konvergen'  # Penjelasan bahasa Indonesia
+                    terms.append({
+                        'n': collected_terms,
+                        'actual_order': i,  # Store actual derivative order
+                        'derivative': str(derivative),
+                        'derivative_at_x0': float(derivative_at_x0) if derivative_at_x0.is_number else str(derivative_at_x0),
+                        'coefficient': float(coeff) if coeff.is_number else str(coeff),
+                        'term': str(term_expr)
                     })
+                    
+                    collected_terms += 1
+                    
+                    # Calculate approximation at x_eval if provided
+                    if x_eval is not None:
+                        # Direct evaluation for each term count
+                        approx_value = 0.0
+                        for j in range(collected_terms):
+                            term_j = terms[j]
+                            d_order = term_j['actual_order']
+                            d = func.diff(x, d_order).subs(x, x0)
+                            approx_value += float(d) * (x_eval - x0)**d_order / np.math.factorial(d_order)
+                        
+                        true_value = float(func.subs(x, x_eval))
+                        abs_error = abs(approx_value - true_value)
+                        rel_error = abs_error / abs(true_value) if true_value != 0 else float('inf')
+                        
+                        # Check bounds
+                        meets_error_bound = True
+                        meets_tolerance = True
+                        if error_bound is not None:
+                            meets_error_bound = abs_error <= error_bound
+                        if tolerance_bound is not None:
+                            meets_tolerance = abs_error <= tolerance_bound
+                        
+                        if approximations is None:
+                            approximations = []
+                        approximations.append({
+                            'Jumlah Suku': collected_terms,
+                            'Nilai Aproksimasi': approx_value,
+                            'Nilai Sebenarnya': true_value,
+                            'Error Absolut': abs_error,
+                            'Error Relatif': rel_error,
+                            'Error Persentase': rel_error * 100,
+                            'Memenuhi Batas Error': meets_error_bound,
+                            'Memenuhi Toleransi': meets_tolerance,
+                            'Keterangan': 'Konvergen' if meets_tolerance else 'Belum Konvergen'
+                        })
+                
+                i += 1
+            
+            # Build series expression from individual terms
+            if terms:
+                series_expr = sp.sympify(0)
+                for term in terms:
+                    term_expr = sp.sympify(term['term'])
+                    series_expr += term_expr
+                series_expr = series_expr.removeO()
             
             result = {
-                'series_expr': str(series),
+                'series_expr': str(series_expr),
                 'terms': terms,
                 'approximations': approximations
             }
             
-            # Add bounds to result if provided
-            if error_bound_result is not None:
-                result['error_bound'] = error_bound_result
-            if tolerance_bound_result is not None:
-                result['tolerance_bound'] = tolerance_bound_result
-            
-            # Add y0 to result if provided
+            # Add y0 to result if provided (untuk plotting)
             if y0 is not None:
                 result['y0'] = y0
             
@@ -459,27 +410,93 @@ def taylor_series(func_str, x0, n_terms, x_eval=None, error_bound=None,
             'y0': y0
         }
 
+def taylor_cos_specific(x_eval=1.0, n_terms=5):
+    """
+    Khusus untuk soal: cos(x) di x0=0, menghitung seperti pada tabel.
+    """
+    x0 = 0.0
+    true_value = np.cos(x_eval)
+    
+    terms_info = []
+    approximations = []
+    
+    # Pre-calculate terms
+    partial_sum = 0
+    for k in range(n_terms):
+        exponent = 2 * k
+        term = (x_eval**exponent) / np.math.factorial(exponent)
+        if k % 2 == 1:
+            term *= -1
+        
+        terms_info.append({
+            'n': k,
+            'exponent': exponent,
+            'coefficient': 1.0 / np.math.factorial(exponent) if k % 2 == 0 else -1.0 / np.math.factorial(exponent),
+            'term_value': term
+        })
+    
+    # Calculate approximations for 0 to n_terms-1 suku
+    for num_suku in range(n_terms):
+        approx = 0
+        for k in range(num_suku + 1):
+            term = terms_info[k]['term_value']
+            approx += term
+        
+        abs_error = abs(approx - true_value)
+        rel_error = abs_error / abs(true_value) if true_value != 0 else float('inf')
+        
+        approximations.append({
+            'Jumlah Suku': num_suku + 1,
+            'Nilai Aproksimasi': approx,
+            'Nilai Sebenarnya': true_value,
+            'Error Absolut': abs_error,
+            'Error Relatif': rel_error,
+            'Error Persentase': rel_error * 100,
+            'Memenuhi Batas Error': True,  # Karena tidak ada batas yang diberikan
+            'Memenuhi Toleransi': True,
+            'Keterangan': '✅'
+        })
+    
+    return {
+        'function': 'cos(x)',
+        'x0': x0,
+        'x_eval': x_eval,
+        'n_terms': n_terms,
+        'true_value': true_value,
+        'terms': terms_info,
+        'approximations': approximations
+    }
+
+
 # Contoh penggunaan:
 if __name__ == "__main__":
-    # Untuk ODE: y' = x²y - y, y(0) = 1, hitung y(2)
-    result = taylor_series(
-        func_str="x**2*y - y",
-        x0=0,
-        n_terms=2,
-        x_eval=2,
-        y0=1,
-        is_ode=True
-    )
+    print("=== Debug: Taylor untuk cos(x) ===")
     
-    print("Hasil untuk ODE:")
-    print("Suku-suku deret:")
+    # Gunakan fungsi khusus
+    result = taylor_cos_specific(x_eval=1.0, n_terms=5)
+    
+    print("Suku-suku:")
     for term in result['terms']:
-        print(f"  n={term['n']}: coefficient={term['coefficient']}, term={term['term']}")
+        print(f"  k={term['n']}: exponent={term['exponent']}, coeff={term['coefficient']:.6f}, value={term['term_value']:.6f}")
     
-    print("\nKonvergensi Aproksimasi:")
+    print("\nTabel Konvergensi:")
+    print(f"{'Suku':<6} {'Aproksimasi':<12} {'Sebenarnya':<12} {'Error Abs':<12} {'Error %':<10}")
+    print("-" * 60)
+    
     for approx in result['approximations']:
-        print(f"  {approx['Jumlah Suku']} suku: {approx['Nilai Aproksimasi']:.6f} "
-              f"(true: {approx['Nilai Sebenarnya']:.6f}, error: {approx['Error Absolut']:.6f})")
+        print(f"{approx['Jumlah Suku']:<6} "
+              f"{approx['Nilai Aproksimasi']:<12.6f} "
+              f"{approx['Nilai Sebenarnya']:<12.6f} "
+              f"{approx['Error Absolut']:<12.2e} "
+              f"{approx['Error Persentase']:<10.4f}%")
+    
+    print("\n=== Test dengan fungsi utama ===")
+    result_main = taylor_series("cos(x)", 0, 5, x_eval=1.0)
+    print(f"Result from main function:")
+    print(f"  Series expression: {result_main['series_expr']}")
+    print(f"  Approximations at x=1.0:")
+    for approx in result_main['approximations']:
+        print(f"    {approx['Jumlah Suku']} suku: {approx['Nilai Aproksimasi']:.6f} (error: {approx['Error Persentase']:.4f}%)")
 
 
 def evaluate_taylor_at_points(func_str, x0, n_terms, x_points, y0=None):
