@@ -16,6 +16,8 @@ def input_form(category, method):
         return input_series(method)
     elif category == "Analysis Features":
         return input_analysis_features(method)
+    elif category == "Differentiation":
+        return input_differentiation(method)
     else:
         st.error("Kategori tidak dikenal")
 
@@ -176,7 +178,7 @@ def input_interpolation(method):
                 y = st.number_input(f"y₍{i}₎", value=float(i**2), key=f"y_{i}")
                 x_points.append(x)
                 y_points.append(y)
-        
+    
     else:  # Generate from function
         func_str = st.text_input("Fungsi f(x)", value="x**2")
         n_points = st.number_input("Jumlah titik", value=5, min_value=2, max_value=10)
@@ -207,43 +209,124 @@ def input_interpolation(method):
     return None
 
 def input_series(method):
-    st.markdown("#### Masukkan Parameter Deret Taylor")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        func_str = st.text_input(
-            "Fungsi f(x)",
-            value="exp(x)",
-            help="Contoh: exp(x), sin(x), cos(x), x**2"
-        )
-    
-    with col2:
-        n_terms = st.number_input(
-            "Jumlah suku",
-            value=5,
-            min_value=1,
-            max_value=20,
-            help="Jumlah suku dalam ekspansi Taylor"
-        )
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        x0 = st.number_input("Titik ekspansi (x₀)", value=0.0, help="Titik di sekitar mana fungsi diekspansi")
-    with col2:
-        x_eval = st.number_input("Nilai x untuk evaluasi", value=1.0, help="Titik untuk mengevaluasi aproksimasi")
-    
-    if st.button("Hitung Deret Taylor", use_container_width=True, type="primary"):
-        try:
-            return {
-                'func_str': func_str,
-                'x0': x0,
-                'n_terms': int(n_terms),
-                'x_eval': x_eval
-            }
-        except ValueError as e:
-            st.error(f"Error: {e}")
-            return None
+    if method == "Taylor":
+        st.markdown("#### Masukkan Parameter Deret Taylor")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            func_str = st.text_input(
+                "Fungsi f(x)",
+                value="exp(x)",
+                help="Contoh: exp(x), sin(x), cos(x), x**2"
+            )
+        
+        with col2:
+            n_terms = st.number_input(
+                "Jumlah suku",
+                value=5,
+                min_value=1,
+                max_value=20,
+                help="Jumlah suku dalam ekspansi Taylor"
+            )
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            x0 = st.number_input("Titik ekspansi (x₀)", value=0.0, help="Titik di sekitar mana fungsi diekspansi")
+        with col2:
+            y0 = st.number_input("Nilai y awal (y₀)", value=0.0, help="Nilai awal y untuk fungsi dengan sumbu y", format="%.6f")
+        with col3:
+            x_eval = st.number_input("Nilai x untuk evaluasi", value=1.0, help="Titik untuk mengevaluasi aproksimasi")
+        
+        # Error Bound dan Tolerance Bound
+        st.markdown("#### Analisis Error dan Toleransi")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            enable_error_bound = st.checkbox("Hitung Batas Error (Error Bound)", value=False, help="Estimasi batas maksimum error")
+            if enable_error_bound:
+                error_bound = st.number_input(
+                    "Batas Error Maksimum",
+                    value=0.01,
+                    format="%.6f",
+                    help="Batas maksimum error yang diizinkan"
+                )
+            else:
+                error_bound = None
+        
+        with col2:
+            enable_tolerance_bound = st.checkbox("Hitung Batas Toleransi (Tolerance Bound)", value=False, help="Tolerance minimum untuk konvergensi")
+            if enable_tolerance_bound:
+                tolerance_bound = st.number_input(
+                    "Digit Signifikan",
+                    value=4,
+                    min_value=1,
+                    max_value=15,
+                    help="Jumlah digit signifikan yang diinginkan"
+                )
+            else:
+                tolerance_bound = None
+        
+        if st.button("Hitung Deret Taylor", use_container_width=True, type="primary"):
+            try:
+                return {
+                    'func_str': func_str,
+                    'x0': x0,
+                    'y0': y0,
+                    'n_terms': int(n_terms),
+                    'x_eval': x_eval,
+                    'error_bound': error_bound,
+                    'tolerance_bound': tolerance_bound
+                }
+            except ValueError as e:
+                st.error(f"Error: {e}")
+                return None
+    else:  # ODE methods: Euler, Taylor ODE 2, Runge-Kutta
+        st.markdown("#### Masukkan Parameter ODE (y' = f(x, y))")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            func_str = st.text_input(
+                "Fungsi f(x, y)",
+                value="x**2*y - y",
+                help="Contoh: x**2*y - y, x + y, sin(x)*cos(y)"
+            )
+        
+        with col2:
+            y0 = st.number_input(
+                "Nilai awal y₀",
+                value=1.0,
+                format="%.6f",
+                help="Nilai y pada x = x₀"
+            )
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            x0 = st.number_input("Titik awal x₀", value=0.0, help="Titik awal integrasi")
+        with col2:
+            x_eval = st.number_input("Titik evaluasi x", value=2.0, help="Titik untuk menghitung y(x)")
+        with col3:
+            n_steps = st.number_input(
+                "Jumlah langkah (n)",
+                value=100,
+                min_value=1,
+                max_value=1000,
+                help="Jumlah langkah integrasi"
+            )
+        
+        if st.button(f"Hitung dengan Metode {method}", use_container_width=True, type="primary"):
+            try:
+                return {
+                    'func_str': func_str,
+                    'x0': x0,
+                    'y0': y0,
+                    'x_eval': x_eval,
+                    'n_steps': int(n_steps)
+                }
+            except ValueError as e:
+                st.error(f"Error: {e}")
+                return None
     
     return None
 
@@ -461,6 +544,189 @@ def input_analysis_features(method):
                 'x_eval': x_eval,
                 'analysis_type': analysis_type,
                 'max_terms': int(max_terms)
+            }
+    
+    return None
+
+def input_differentiation(method):
+    st.markdown("#### Masukkan Parameter Differentiation")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        func_str = st.text_input(
+            "Fungsi f(x)",
+            value="sin(x)",
+            help="Contoh: sin(x), x**2, exp(x), cos(x)"
+        )
+    
+    with col2:
+        h = st.number_input(
+            "Langkah (h)",
+            value=0.01,
+            format="%.6f",
+            min_value=1e-8,
+            max_value=1.0,
+            help="Ukuran langkah untuk diferensiasi"
+        )
+    
+    if method in ["Forward Difference", "Backward Difference", "Central Difference (1st Derivative)", "Central Difference (2nd Derivative)"]:
+        x_val = st.number_input("Titik x untuk diferensiasi", value=1.0)
+        
+        if st.button("Hitung Turunan", use_container_width=True, type="primary"):
+            return {
+                'func_str': func_str,
+                'x_val': x_val,
+                'h': h,
+                'method': method
+            }
+    
+    elif method == "Compare All Methods":
+        x_val = st.number_input("Titik x untuk diferensiasi", value=1.0)
+        
+        if st.button("Bandingkan Semua Metode", use_container_width=True, type="primary"):
+            return {
+                'func_str': func_str,
+                'x_val': x_val,
+                'h': h,
+                'method': method
+            }
+    
+    elif method == "Convergence Analysis":
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            x_val = st.number_input("Titik x untuk diferensiasi", value=1.0)
+        with col2:
+            derivative_order = st.selectbox(
+                "Orde Turunan",
+                [1, 2],
+                help="1 untuk f'(x), 2 untuk f''(x)"
+            )
+        with col3:
+            num_points = st.number_input(
+                "Jumlah titik h",
+                value=10,
+                min_value=3,
+                max_value=50,
+                help="Jumlah nilai h yang akan diuji"
+            )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            h_min = st.number_input(
+                "h minimum",
+                value=1e-6,
+                format="%.2e",
+                min_value=1e-8,
+                max_value=1e-3,
+                help="Nilai h terkecil"
+            )
+        with col2:
+            h_max = st.number_input(
+                "h maximum",
+                value=0.1,
+                format="%.2e",
+                min_value=1e-4,
+                max_value=1.0,
+                help="Nilai h terbesar"
+            )
+        
+        if st.button("Analisis Konvergensi", use_container_width=True, type="primary"):
+            return {
+                'func_str': func_str,
+                'x_val': x_val,
+                'h_min': h_min,
+                'h_max': h_max,
+                'num_points': int(num_points),
+                'derivative_order': derivative_order,
+                'method': method
+            }
+    
+    elif method == "Optimal h Analysis":
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            x_val = st.number_input("Titik x untuk diferensiasi", value=1.0)
+        with col2:
+            num_points = st.number_input(
+                "Jumlah titik h",
+                value=20,
+                min_value=5,
+                max_value=50,
+                help="Jumlah nilai h yang akan diuji"
+            )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            h_min = st.number_input(
+                "h minimum",
+                value=1e-7,
+                format="%.2e",
+                min_value=1e-8,
+                max_value=1e-3,
+                help="Nilai h terkecil"
+            )
+        with col2:
+            h_max = st.number_input(
+                "h maximum",
+                value=0.1,
+                format="%.2e",
+                min_value=1e-4,
+                max_value=1.0,
+                help="Nilai h terbesar"
+            )
+        
+        if st.button("Analisis h Optimal", use_container_width=True, type="primary"):
+            return {
+                'func_str': func_str,
+                'x_val': x_val,
+                'h_min': h_min,
+                'h_max': h_max,
+                'num_points': int(num_points),
+                'method': method
+            }
+    
+    elif method == "Multi-point Differentiation":
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            derivative_order = st.selectbox(
+                "Orde Turunan",
+                [1, 2],
+                help="1 untuk f'(x), 2 untuk f''(x)"
+            )
+        with col2:
+            diff_method = st.selectbox(
+                "Metode Diferensiasi",
+                ["forward", "backward", "central"],
+                help="Metode untuk menghitung turunan"
+            )
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            x_min = st.number_input("x minimum", value=0.0)
+        with col2:
+            x_max = st.number_input("x maximum", value=2.0)
+        with col3:
+            n_points = st.number_input(
+                "Jumlah titik",
+                value=10,
+                min_value=2,
+                max_value=50,
+                help="Jumlah titik x untuk diferensiasi"
+            )
+        
+        x_points = np.linspace(x_min, x_max, n_points).tolist()
+        
+        if st.button("Hitung di Beberapa Titik", use_container_width=True, type="primary"):
+            return {
+                'func_str': func_str,
+                'x_points': x_points,
+                'h': h,
+                'derivative_order': derivative_order,
+                'diff_method': diff_method,
+                'method': method
             }
     
     return None

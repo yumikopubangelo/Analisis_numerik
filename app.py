@@ -8,10 +8,12 @@ from ui.displays import (
     display_integration_results,
     display_interpolation_results,
     display_taylor_results,
+    display_ode_results,
     display_true_value_results,
     display_error_analysis_results,
     display_tolerance_check_results,
-    display_taylor_polynomial_results
+    display_taylor_polynomial_results,
+    display_differentiation_results
 )
 
 # Root finding methods
@@ -29,7 +31,7 @@ from core.interpolation.lagrange import lagrange_interpolation
 from core.interpolation.newton import newton_interpolation
 
 # Series methods
-from core.series.taylor_series import taylor_series
+from core.series.taylor_series import taylor_series, euler_method, taylor_ode_order2, runge_kutta_method
 
 st.set_page_config(
     page_title="Numerical Analysis App",
@@ -149,9 +151,37 @@ def main():
                 if method == "Taylor":
                     result = taylor_series(
                         params['func_str'], params['x0'],
-                        params['n_terms'], params['x_eval']
+                        params['n_terms'], params['x_eval'],
+                        params.get('error_bound'),
+                        params.get('tolerance_bound'),
+                        params.get('y0')
                     )
                     display_taylor_results(result, params)
+                elif method == "Euler":
+                    result = euler_method(
+                        params['func_str'], params['x0'],
+                        params['y0'], params['x_eval'],
+                        n_steps=params['n_steps']
+                    )
+                    display_ode_results(result, params)
+                elif method == "Taylor ODE 2":
+                    result = taylor_ode_order2(
+                        params['func_str'], params['x0'],
+                        params['y0'], params['x_eval'],
+                        n_steps=params['n_steps']
+                    )
+                    display_ode_results(result, params)
+                elif method == "Runge-Kutta":
+                    result = runge_kutta_method(
+                        params['func_str'], params['x0'],
+                        params['y0'], params['x_eval'],
+                        n_steps=params['n_steps']
+                    )
+                    display_ode_results(result, params)
+            
+            # DIFFERENTIATION
+            elif category == "Differentiation":
+                display_differentiation_results(params)
             
             # ANALYSIS FEATURES
             elif category == "Analysis Features":

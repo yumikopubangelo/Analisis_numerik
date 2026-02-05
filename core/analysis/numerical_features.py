@@ -28,7 +28,18 @@ class NumericalAnalysis:
         """
         self.func_str = func_str
         self.x = sp.Symbol('x')
-        self.func_symbolic = sp.sympify(func_str)
+        # Map common constants so users can input e, E, pi naturally
+        locals_map = {'e': sp.E, 'E': sp.E, 'pi': sp.pi}
+        self.func_symbolic = sp.sympify(func_str, locals=locals_map)
+        # Allow y as an alias for x - substitute y with x if present
+        y = sp.Symbol('y')
+        if y in self.func_symbolic.free_symbols:
+            self.func_symbolic = self.func_symbolic.subs(y, self.x)
+        # Ensure no unexpected symbols remain
+        unknown = self.func_symbolic.free_symbols - {self.x}
+        if unknown:
+            unknown_str = ", ".join(sorted(str(s) for s in unknown))
+            raise ValueError(f"Fungsi hanya boleh memakai variabel x. Simbol lain: {unknown_str}")
         self.func_numeric = sp.lambdify(self.x, self.func_symbolic, 'numpy')
     
     # ========== FITUR 1: NILAI SEBENARNYA f(x) ==========

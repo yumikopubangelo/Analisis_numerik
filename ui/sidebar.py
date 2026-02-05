@@ -15,7 +15,7 @@ def sidebar():
         st.markdown("### Pilih Kategori")
         category = st.selectbox(
             "Kategori Metode",
-            ["Root Finding", "Integration", "Interpolation", "Series", "Analysis Features"],
+            ["Root Finding", "Integration", "Interpolation", "Series", "Analysis Features", "Differentiation"],
             label_visibility="collapsed"
         )
         
@@ -71,7 +71,10 @@ def sidebar():
         
         elif category == "Series":
             method_options = {
-                "Taylor": "Deret Taylor"
+                "Taylor": "Deret Taylor",
+                "Euler": "Metode Euler",
+                "Taylor ODE 2": "Taylor ODE Orde 2",
+                "Runge-Kutta": "Metode Runge-Kutta (RK4)"
             }
             method_labels = list(method_options.values())
             method_keys = list(method_options.keys())
@@ -83,6 +86,27 @@ def sidebar():
             )
             method = method_keys[method_labels.index(selected_label)]
         
+        elif category == "Differentiation":
+            method_options = {
+                "Forward Difference": "Selisih Maju (Forward Difference)",
+                "Backward Difference": "Selisih Mundur (Backward Difference)",
+                "Central Difference (1st Derivative)": "Selisih Pusat (Turunan Pertama)",
+                "Central Difference (2nd Derivative)": "Selisih Pusat (Turunan Kedua)",
+                "Compare All Methods": "Bandingkan Semua Metode (Turunan Pertama)",
+                "Convergence Analysis": "Analisis Konvergensi dengan Variasi h",
+                "Optimal h Analysis": "Analisis h Optimal untuk Error Minimum",
+                "Multi-point Differentiation": "Diferensiasi pada Beberapa Titik"
+            }
+            method_labels = list(method_options.values())
+            method_keys = list(method_options.keys())
+            
+            selected_label = st.radio(
+                "Metode",
+                method_labels,
+                label_visibility="collapsed"
+            )
+            method = method_keys[method_labels.index(selected_label)]
+            
         else:  # Analysis Features
             method_options = {
                 "True Value": "Nilai Sebenarnya f(x)",
@@ -131,6 +155,17 @@ def sidebar():
             **Deret Taylor** mengaproksimasi fungsi dengan polinomial di sekitar titik tertentu.
             
             Semakin banyak suku, semakin akurat aproksimasi.
+            """)
+        
+        elif category == "Differentiation":
+            st.info("""
+            **Numerical Differentiation** menghitung turunan fungsi dengan metode numerik:
+            
+            - **Selisih Maju (Forward)**: O(h) akurasi, mudah dihitung
+            - **Selisih Mundur (Backward)**: O(h) akurasi, mudah dihitung  
+            - **Selisih Pusat (Central)**: O(h²) akurasi, lebih presisi
+            
+            Pilih metode yang sesuai dengan kebutuhan akurasi!
             """)
         
         else:  # Analysis Features
