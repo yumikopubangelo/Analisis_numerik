@@ -31,6 +31,21 @@ def display_pde_results(X: np.ndarray, Y: np.ndarray, w: np.ndarray,
         q: Applied load
         D: Flexural rigidity
     """
+    # Display numerical discretization explanation
+    st.markdown("""
+    ### Diskritisasi Numerik untuk Persamaan Biharmonik
+
+    **Persamaan Asli:**
+    $$\n    \\frac{\\partial^4 w}{\\partial x^4} + 2\\frac{\\partial^4 w}{\\partial x^2 \\partial y^2} + \\frac{\\partial^4 w}{\\partial y^4} = \\frac{q}{D}\n    $$
+
+    **Stencil 13-titik Finite Difference:**
+    $$20w_{i,j} - 8(w_{i+1,j} + w_{i-1,j} + w_{i,j+1} + w_{i,j-1}) + 2(w_{i+1,j+1} + w_{i+1,j-1} + w_{i-1,j+1} + w_{i-1,j-1}) - (w_{i+2,j} + w_{i-2,j} + w_{i,j+2} + w_{i,j-2}) = \\frac{q}{D} h^4$$
+
+    dengan $h = \\Delta x = \\Delta y$
+    """)
+
+    st.markdown("---")
+
     # Display statistics
     stats = compute_statistics(w)
 
@@ -41,13 +56,13 @@ def display_pde_results(X: np.ndarray, Y: np.ndarray, w: np.ndarray,
         st.metric("Kekakuan D (kN·m)", f"{D:.2e}")
         st.metric("Jumlah Iterasi", iterations)
     with col2:
-        st.metric("Defleksi Maksimum", f"{stats['max_deflection']:.6f}")
-        st.metric("Rata-rata Defleksi", f"{stats['mean_deflection']:.6f}")
+        st.metric("Defleksi Maksimum (mm)", f"{stats['max_deflection']*1000:.3f}")
+        st.metric("Rata-rata Defleksi (mm)", f"{stats['mean_deflection']*1000:.3f}")
         st.metric("Error Final", f"{error:.2e}")
     with col3:
-        st.metric("Defleksi Minimum", f"{stats['min_deflection']:.6f}")
-        st.metric("Standar Deviasi", f"{stats['std_deflection']:.6f}")
-        st.metric("Total Defleksi", f"{stats['total_deflection']:.6f}")
+        st.metric("Defleksi Minimum (mm)", f"{stats['min_deflection']*1000:.3f}")
+        st.metric("Standar Deviasi (mm)", f"{stats['std_deflection']*1000:.3f}")
+        st.metric("Defleksi di Pusat (mm)", f"{stats['deflection_at_center']*1000:.3f}")
 
     st.markdown("---")
 

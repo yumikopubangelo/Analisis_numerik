@@ -109,7 +109,8 @@ def sidebar():
             
         elif category == "PDE Solver":
             method_options = {
-                "Biharmonic Plate": "Persamaan Plat Biharmonik"
+                "Biharmonic Plate": "Persamaan Plat Biharmonik",
+                "Advection Diffusion 1D": "Advection-Diffusion 1D"
             }
             method_labels = list(method_options.values())
             method_keys = list(method_options.keys())

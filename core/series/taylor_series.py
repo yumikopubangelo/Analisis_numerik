@@ -38,8 +38,23 @@ def euler_method(func_str, x0, y0, x_eval, h=None, n_steps=None):
     for i in range(n_steps):
         y_values[i+1] = y_values[i] + h * f_np(x_values[i], y_values[i])
     
-    # Exact solution for comparison (for the example ODE y' = x²y - y)
-    exact_solution = float(sp.exp((x_eval**3)/3 - x_eval))
+    # Calculate exact solution only for specific ODE cases where we know the analytical solution
+    if func_str.strip() == "x**2*y - y" and x0 == 0 and y0 == 1:
+        # ODE: y' = x²y - y, y(0) = 1 has analytical solution y = exp(x³/3 - x)
+        exact_solution = float(sp.exp((x_eval**3)/3 - x_eval))
+    elif func_str.strip() == "x/y" and x0 == 0 and y0 == 1:
+        # ODE: y' = x/y, y(0) = 1 has analytical solution y = sqrt(x² + 1)
+        exact_solution = float(np.sqrt(x_eval**2 + 1))
+    elif func_str.strip() == "x*sqrt(y)" and x0 == 0 and y0 == 1:
+        # ODE: y' = x*sqrt(y), y(0) = 1 has analytical solution y = (1 + x²/4)²
+        exact_solution = float((1 + x_eval**2 / 4)**2)
+    else:
+        # For general ODEs, we don't have the analytical solution
+        exact_solution = None
+    
+    # Calculate errors only if exact solution is available
+    absolute_error = abs(y_values[-1] - exact_solution) if exact_solution is not None else None
+    relative_error = abs(y_values[-1] - exact_solution) / abs(exact_solution) if exact_solution is not None and exact_solution != 0 else None
     
     return {
         'method': 'Euler',
@@ -50,8 +65,8 @@ def euler_method(func_str, x0, y0, x_eval, h=None, n_steps=None):
         'n_steps': n_steps,
         'approximation': y_values[-1],
         'exact': exact_solution,
-        'absolute_error': abs(y_values[-1] - exact_solution),
-        'relative_error': abs(y_values[-1] - exact_solution) / abs(exact_solution) if exact_solution != 0 else float('inf'),
+        'absolute_error': absolute_error,
+        'relative_error': relative_error,
         'x_values': x_values,
         'y_values': y_values
     }
@@ -103,8 +118,23 @@ def taylor_ode_order2(func_str, x0, y0, x_eval, h=None, n_steps=None):
         y_i = y_values[i]
         y_values[i+1] = y_i + h * f_np(x_i, y_i) + (h**2 / 2) * f_prime_np(x_i, y_i)
     
-    # Exact solution for comparison (for the example ODE y' = x²y - y)
-    exact_solution = float(sp.exp((x_eval**3)/3 - x_eval))
+    # Calculate exact solution only for specific ODE cases where we know the analytical solution
+    if func_str.strip() == "x**2*y - y" and x0 == 0 and y0 == 1:
+        # ODE: y' = x²y - y, y(0) = 1 has analytical solution y = exp(x³/3 - x)
+        exact_solution = float(sp.exp((x_eval**3)/3 - x_eval))
+    elif func_str.strip() == "x/y" and x0 == 0 and y0 == 1:
+        # ODE: y' = x/y, y(0) = 1 has analytical solution y = sqrt(x² + 1)
+        exact_solution = float(np.sqrt(x_eval**2 + 1))
+    elif func_str.strip() == "x*sqrt(y)" and x0 == 0 and y0 == 1:
+        # ODE: y' = x*sqrt(y), y(0) = 1 has analytical solution y = (1 + x²/4)²
+        exact_solution = float((1 + x_eval**2 / 4)**2)
+    else:
+        # For general ODEs, we don't have the analytical solution
+        exact_solution = None
+    
+    # Calculate errors only if exact solution is available
+    absolute_error = abs(y_values[-1] - exact_solution) if exact_solution is not None else None
+    relative_error = abs(y_values[-1] - exact_solution) / abs(exact_solution) if exact_solution is not None and exact_solution != 0 else None
     
     return {
         'method': 'Taylor ODE Order 2',
@@ -115,8 +145,8 @@ def taylor_ode_order2(func_str, x0, y0, x_eval, h=None, n_steps=None):
         'n_steps': n_steps,
         'approximation': y_values[-1],
         'exact': exact_solution,
-        'absolute_error': abs(y_values[-1] - exact_solution),
-        'relative_error': abs(y_values[-1] - exact_solution) / abs(exact_solution) if exact_solution != 0 else float('inf'),
+        'absolute_error': absolute_error,
+        'relative_error': relative_error,
         'x_values': x_values,
         'y_values': y_values
     }
@@ -167,8 +197,23 @@ def runge_kutta_method(func_str, x0, y0, x_eval, h=None, n_steps=None):
         
         y_values[i+1] = y_i + (k1 + 2*k2 + 2*k3 + k4) / 6
     
-    # Exact solution for comparison (for the example ODE y' = x²y - y)
-    exact_solution = float(sp.exp((x_eval**3)/3 - x_eval))
+    # Calculate exact solution only for specific ODE cases where we know the analytical solution
+    if func_str.strip() == "x**2*y - y" and x0 == 0 and y0 == 1:
+        # ODE: y' = x²y - y, y(0) = 1 has analytical solution y = exp(x³/3 - x)
+        exact_solution = float(sp.exp((x_eval**3)/3 - x_eval))
+    elif func_str.strip() == "x/y" and x0 == 0 and y0 == 1:
+        # ODE: y' = x/y, y(0) = 1 has analytical solution y = sqrt(x² + 1)
+        exact_solution = float(np.sqrt(x_eval**2 + 1))
+    elif func_str.strip() == "x*sqrt(y)" and x0 == 0 and y0 == 1:
+        # ODE: y' = x*sqrt(y), y(0) = 1 has analytical solution y = (1 + x²/4)²
+        exact_solution = float((1 + x_eval**2 / 4)**2)
+    else:
+        # For general ODEs, we don't have the analytical solution
+        exact_solution = None
+    
+    # Calculate errors only if exact solution is available
+    absolute_error = abs(y_values[-1] - exact_solution) if exact_solution is not None else None
+    relative_error = abs(y_values[-1] - exact_solution) / abs(exact_solution) if exact_solution is not None and exact_solution != 0 else None
     
     return {
         'method': 'Runge-Kutta (RK4)',
@@ -179,8 +224,8 @@ def runge_kutta_method(func_str, x0, y0, x_eval, h=None, n_steps=None):
         'n_steps': n_steps,
         'approximation': y_values[-1],
         'exact': exact_solution,
-        'absolute_error': abs(y_values[-1] - exact_solution),
-        'relative_error': abs(y_values[-1] - exact_solution) / abs(exact_solution) if exact_solution != 0 else float('inf'),
+        'absolute_error': absolute_error,
+        'relative_error': relative_error,
         'x_values': x_values,
         'y_values': y_values
     }
@@ -357,7 +402,11 @@ def taylor_series(func_str, x0, n_terms, x_eval=None, error_bound=None,
                               float(df_dy_at_x0) * derivative_values[2])
             derivative_values.append(y_triple_prime)
         
-        # Fill remaining with zeros if needed
+        # Limit maximum terms to 4 (since we only calculate up to 3rd derivative)
+        if n_terms > 4:
+            n_terms = 4
+        
+        # Fill remaining with zeros if needed (should not be necessary now)
         while len(derivative_values) < n_terms:
             derivative_values.append(0.0)
         
@@ -374,12 +423,27 @@ def taylor_series(func_str, x0, n_terms, x_eval=None, error_bound=None,
                 term_val = derivative_values[i] * (h**i) / sp.factorial(i)
                 approx += float(term_val)
             
-            # For ODE, true value is unknown unless we compute exact solution
-            # For this example, we'll compute exact: y(x) = exp(x³/3 - x)
-            true_value = float(sp.exp((x_eval**3)/3 - x_eval))  # Exact solution
+            # Calculate exact solution only for specific ODE cases where we know the analytical solution
+            if func_str.strip() == "x**2*y - y" and x0 == 0 and y0 == 1:
+                # ODE: y' = x²y - y, y(0) = 1 has analytical solution y = exp(x³/3 - x)
+                true_value = float(sp.exp((x_eval**3)/3 - x_eval))
+            elif func_str.strip() == "x/y" and x0 == 0 and y0 == 1:
+                # ODE: y' = x/y, y(0) = 1 has analytical solution y = sqrt(x² + 1)
+                true_value = float(np.sqrt(x_eval**2 + 1))
+            elif func_str.strip() == "x*sqrt(y)" and x0 == 0 and y0 == 1:
+                # ODE: y' = x*sqrt(y), y(0) = 1 has analytical solution y = (1 + x²/4)²
+                true_value = float((1 + x_eval**2 / 4)**2)
+            else:
+                # For general ODEs, we don't have the analytical solution
+                true_value = None
             
-            abs_error = abs(approx - true_value)
-            rel_error = abs_error / abs(true_value) if true_value != 0 else float('inf')
+            # Calculate errors only if exact solution is available
+            if true_value is not None:
+                abs_error = abs(approx - true_value)
+                rel_error = abs_error / abs(true_value) if true_value != 0 else float('inf')
+            else:
+                abs_error = None
+                rel_error = None
             
             terms_info = []
             for i in range(num_terms):
@@ -390,13 +454,16 @@ def taylor_series(func_str, x0, n_terms, x_eval=None, error_bound=None,
                     'term': f"{float(coeff):.6f} * (x-{x0})^{i}"
                 })
             
+            # Prepare error values for display
+            error_persentase = rel_error * 100 if rel_error is not None else None
+            
             approximations.append({
                 'Jumlah Suku': num_terms,
                 'Nilai Aproksimasi': approx,
                 'Nilai Sebenarnya': true_value,
                 'Error Absolut': abs_error,
                 'Error Relatif': rel_error,
-                'Error Persentase': rel_error * 100
+                'Error Persentase': error_persentase
             })
             
             if num_terms == n_terms:

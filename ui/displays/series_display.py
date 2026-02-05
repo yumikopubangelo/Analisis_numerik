@@ -41,12 +41,23 @@ def display_ode_results(result, params):
     
     # Results table
     st.markdown("#### Hasil Perhitungan")
+    
+    # Handle case when exact solution is None
+    exact_value = result['exact']
+    exact_str = f"{exact_value:.6f}" if exact_value is not None else "-"
+    
+    abs_error = result['absolute_error']
+    abs_error_str = f"{abs_error:.6e}" if abs_error is not None else "-"
+    
+    rel_error = result['relative_error']
+    rel_error_str = f"{rel_error:.6e}" if rel_error is not None else "-"
+    
     df_results = pd.DataFrame({
         'Metode': [result['method']],
         'Aproksimasi y(x)': [f"{result['approximation']:.6f}"],
-        'Nilai Sebenarnya': [f"{result['exact']:.6f}"],
-        'Error Absolut': [f"{result['absolute_error']:.6e}"],
-        'Error Relatif': [f"{result['relative_error']:.6e}"]
+        'Nilai Sebenarnya': [exact_str],
+        'Error Absolut': [abs_error_str],
+        'Error Relatif': [rel_error_str]
     })
     st.dataframe(df_results, use_container_width=True)
     
@@ -176,15 +187,15 @@ def display_taylor_results(result, params):
         
         # Format numeric columns
         if 'Nilai Aproksimasi' in df_display.columns:
-            df_display['Nilai Aproksimasi'] = df_display['Nilai Aproksimasi'].apply(lambda x: f"{x:.6f}")
+            df_display['Nilai Aproksimasi'] = df_display['Nilai Aproksimasi'].apply(lambda x: f"{x:.6f}" if x is not None else "-")
         if 'Nilai Sebenarnya' in df_display.columns:
-            df_display['Nilai Sebenarnya'] = df_display['Nilai Sebenarnya'].apply(lambda x: f"{x:.6f}")
+            df_display['Nilai Sebenarnya'] = df_display['Nilai Sebenarnya'].apply(lambda x: f"{x:.6f}" if x is not None else "-")
         if 'Error Absolut' in df_display.columns:
-            df_display['Error Absolut'] = df_display['Error Absolut'].apply(lambda x: f"{x:.6e}")
+            df_display['Error Absolut'] = df_display['Error Absolut'].apply(lambda x: f"{x:.6e}" if x is not None else "-")
         if 'Error Relatif' in df_display.columns:
-            df_display['Error Relatif'] = df_display['Error Relatif'].apply(lambda x: f"{x:.6e}")
+            df_display['Error Relatif'] = df_display['Error Relatif'].apply(lambda x: f"{x:.6e}" if x is not None else "-")
         if 'Error Persentase' in df_display.columns:
-            df_display['Error Persentase'] = df_display['Error Persentase'].apply(lambda x: f"{x:.4f}%")
+            df_display['Error Persentase'] = df_display['Error Persentase'].apply(lambda x: f"{x:.4f}%" if x is not None else "-")
         
         # Display the table
         st.dataframe(df_display, use_container_width=True)

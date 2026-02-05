@@ -14,7 +14,8 @@ from ui.displays import (
     display_tolerance_check_results,
     display_taylor_polynomial_results,
     display_differentiation_results,
-    display_pde_results
+    display_pde_results,
+    display_advection_diffusion_results
 )
 
 # PDE Solver methods
@@ -203,6 +204,8 @@ def main():
                     )
                     display_pde_results(X, Y, w, iterations, error, params['solver_type'].capitalize(), 
                                        params['q'], params['D'])
+                elif method == "Advection Diffusion 1D":
+                    display_advection_diffusion_results(params)
             
             # ANALYSIS FEATURES
             elif category == "Analysis Features":
