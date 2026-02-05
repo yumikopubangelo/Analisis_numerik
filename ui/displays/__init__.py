@@ -14,6 +14,7 @@ from .analysis_display import (
     display_taylor_polynomial_results
 )
 from .differentiation_display import display_differentiation_results
+from .pde_display import display_pde_results
 
 __all__ = [
     'display_root_finding_results',

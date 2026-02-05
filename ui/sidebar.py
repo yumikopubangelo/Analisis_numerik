@@ -15,7 +15,7 @@ def sidebar():
         st.markdown("### Pilih Kategori")
         category = st.selectbox(
             "Kategori Metode",
-            ["Root Finding", "Integration", "Interpolation", "Series", "Analysis Features", "Differentiation"],
+            ["Root Finding", "Integration", "Interpolation", "Series", "Analysis Features", "Differentiation", "PDE Solver"],
             label_visibility="collapsed"
         )
         
@@ -107,6 +107,20 @@ def sidebar():
             )
             method = method_keys[method_labels.index(selected_label)]
             
+        elif category == "PDE Solver":
+            method_options = {
+                "Biharmonic Plate": "Persamaan Plat Biharmonik"
+            }
+            method_labels = list(method_options.values())
+            method_keys = list(method_options.keys())
+            
+            selected_label = st.radio(
+                "Metode",
+                method_labels,
+                label_visibility="collapsed"
+            )
+            method = method_keys[method_labels.index(selected_label)]
+            
         else:  # Analysis Features
             method_options = {
                 "True Value": "Nilai Sebenarnya f(x)",
@@ -168,6 +182,18 @@ def sidebar():
             Pilih metode yang sesuai dengan kebutuhan akurasi!
             """)
         
+        elif category == "PDE Solver":
+            st.info("""
+            **PDE Solver** menyelesaikan Persamaan Partial Differential Equation (PDE)
+            untuk analisis defleksi plat menggunakan metode finite difference:
+            
+            - **Persamaan Plat Biharmonik**: Menghitung defleksi plat tebal under beban
+            - Solver iteratif: Jacobi dan Gauss-Seidel
+            - Visualisasi 3D dan kontur defleksi
+            
+            Pilih metode solver dan parameter grid untuk perhitungan!
+            """)
+            
         else:  # Analysis Features
             st.info("""
             **Analysis Features** menyediakan tools untuk:

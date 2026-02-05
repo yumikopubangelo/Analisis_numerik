@@ -13,8 +13,12 @@ from ui.displays import (
     display_error_analysis_results,
     display_tolerance_check_results,
     display_taylor_polynomial_results,
-    display_differentiation_results
+    display_differentiation_results,
+    display_pde_results
 )
+
+# PDE Solver methods
+from core.pde.biharmonic_solver import solve_biharmonic_equation
 
 # Root finding methods
 from core.root_findings.bisection import bisection_method
@@ -182,6 +186,23 @@ def main():
             # DIFFERENTIATION
             elif category == "Differentiation":
                 display_differentiation_results(params)
+            
+            # PDE SOLVER
+            elif category == "PDE Solver":
+                if method == "Biharmonic Plate":
+                    X, Y, w, iterations, error = solve_biharmonic_equation(
+                        params['x_min'], params['x_max'],
+                        params['y_min'], params['y_max'],
+                        params['nx'], params['ny'],
+                        params['load_func'],
+                        params['solver_type'],
+                        params['tol'],
+                        params['max_iter'],
+                        q=params['q'],
+                        D=params['D']
+                    )
+                    display_pde_results(X, Y, w, iterations, error, params['solver_type'].capitalize(), 
+                                       params['q'], params['D'])
             
             # ANALYSIS FEATURES
             elif category == "Analysis Features":

@@ -18,8 +18,137 @@ def input_form(category, method):
         return input_analysis_features(method)
     elif category == "Differentiation":
         return input_differentiation(method)
+    elif category == "PDE Solver":
+        return input_pde(method)
     else:
         st.error("Kategori tidak dikenal")
+
+def input_pde(method):
+    st.markdown("#### Masukkan Parameter PDE Solver")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        solver_type = st.selectbox(
+            "Metode Solver",
+            ["jacobi", "gauss-seidel"],
+            format_func=lambda x: x.capitalize()
+        )
+        
+        nx = st.number_input(
+            "Jumlah grid X",
+            value=50,
+            min_value=10,
+            max_value=200,
+            step=10,
+            help="Jumlah titik grid dalam arah x"
+        )
+    
+    with col2:
+        tol = st.number_input(
+            "Toleransi",
+            value=1e-6,
+            format="%.2e",
+            help="Kriteria konvergensi"
+        )
+        
+        ny = st.number_input(
+            "Jumlah grid Y",
+            value=50,
+            min_value=10,
+            max_value=200,
+            step=10,
+            help="Jumlah titik grid dalam arah y"
+        )
+    
+    max_iter = st.number_input(
+        "Maksimum iterasi",
+        value=10000,
+        min_value=100,
+        max_value=100000,
+        step=1000
+    )
+    
+    st.markdown("#### Batas Domain")
+    col1, col2 = st.columns(2)
+    with col1:
+        x_min = st.number_input("X minimum", value=0.0)
+        x_max = st.number_input("X maximum", value=1.0)
+    with col2:
+        y_min = st.number_input("Y minimum", value=0.0)
+        y_max = st.number_input("Y maximum", value=1.0)
+    
+    st.markdown("#### Parameter Material dan Beban")
+    col1, col2 = st.columns(2)
+    with col1:
+        q = st.number_input(
+            "Beban distribusi q (kN/m²)",
+            value=10.0,
+            min_value=0.1,
+            max_value=1000.0,
+            help="Beban transversal yang bekerja pada plat"
+        )
+    with col2:
+        D = st.number_input(
+            "Kekakuan lentur D (kN·m)",
+            value=10000.0,
+            min_value=100.0,
+            max_value=1000000.0,
+            help="Modulus kekakuan lentur plat"
+        )
+    
+    st.markdown("#### Beban Plat")
+    load_type = st.radio(
+        "Jenis beban",
+        ["Uniform Load (Rata-rata)", "Central Load (Pusat)", "Custom Load"],
+        horizontal=True
+    )
+    
+    if load_type == "Uniform Load (Rata-rata)":
+        load_func = lambda x, y: 1.0
+    elif load_type == "Central Load (Pusat)":
+        center_x = (x_min + x_max) / 2
+        center_y = (y_min + y_max) / 2
+        radius = min(x_max - x_min, y_max - y_min) / 4
+        load_func = lambda x, y: np.exp(-((x - center_x)/radius)**2 - ((y - center_y)/radius)**2)
+    else:
+        load_str = st.text_input(
+            "Fungsi beban q(x, y)",
+            value="sin(pi*x) * sin(pi*y)",
+            help="Contoh: sin(pi*x)*sin(pi*y), exp(-(x-0.5)**2 - (y-0.5)**2)"
+        )
+        
+        # Parse custom load function
+        def load_func(x, y):
+            try:
+                # Replace variables in string with actual values
+                expr = load_str.replace('x', str(x)).replace('y', str(y)).replace('pi', str(np.pi))
+                return eval(expr)
+            except:
+                return 1.0
+    
+    if st.button("Hitung Defleksi Plat", use_container_width=True, type="primary"):
+        try:
+            return {
+                'solver_type': solver_type,
+                'nx': int(nx),
+                'ny': int(ny),
+                'tol': tol,
+                'max_iter': int(max_iter),
+                'x_min': x_min,
+                'x_max': x_max,
+                'y_min': y_min,
+                'y_max': y_max,
+                'q': q,
+                'D': D,
+                'load_func': load_func,
+                'load_type': load_type
+            }
+        except ValueError as e:
+            st.error(f"Error: {e}")
+            return None
+    
+    return None
 
 def input_root_finding(method):
     st.markdown("#### Masukkan Parameter")
