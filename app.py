@@ -15,11 +15,13 @@ from ui.displays import (
     display_taylor_polynomial_results,
     display_differentiation_results,
     display_pde_results,
-    display_advection_diffusion_results
+    display_advection_diffusion_results,
+    display_laplace_solver
 )
 
 # PDE Solver methods
 from core.pde.biharmonic_solver import solve_biharmonic_equation
+from core.pde.laplace_solver import solve_laplace_equation
 
 # Root finding methods
 from core.root_findings.bisection import bisection_method
@@ -87,6 +89,13 @@ def main():
     
     # Sidebar & Input
     category, method = sidebar()
+    
+    # Handle PDE Solver separately (Laplace has its own input form)
+    if category == "PDE Solver" and method == "Laplace Equation":
+        display_laplace_solver()
+        return
+    
+    # For other methods, use input_form
     params = input_form(category, method)
     
     if params:
@@ -188,7 +197,7 @@ def main():
             elif category == "Differentiation":
                 display_differentiation_results(params)
             
-            # PDE SOLVER
+            # PDE SOLVER (non-Laplace methods)
             elif category == "PDE Solver":
                 if method == "Biharmonic Plate":
                     X, Y, w, iterations, error = solve_biharmonic_equation(

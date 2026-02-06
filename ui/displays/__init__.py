@@ -16,6 +16,7 @@ from .analysis_display import (
 from .differentiation_display import display_differentiation_results
 from .pde_display import display_pde_results
 from .advection_diffusion_display import display_advection_diffusion_results
+from .laplace_display import display_laplace_solver
 
 __all__ = [
     'display_root_finding_results',
@@ -29,5 +30,6 @@ __all__ = [
     'display_taylor_polynomial_results',
     'display_differentiation_results',
     'display_pde_results',
-    'display_advection_diffusion_results'
+    'display_advection_diffusion_results',
+    'display_laplace_solver'
 ]

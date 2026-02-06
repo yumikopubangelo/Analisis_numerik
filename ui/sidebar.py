@@ -110,7 +110,8 @@ def sidebar():
         elif category == "PDE Solver":
             method_options = {
                 "Biharmonic Plate": "Persamaan Plat Biharmonik",
-                "Advection Diffusion 1D": "Advection-Diffusion 1D"
+                "Advection Diffusion 1D": "Advection-Diffusion 1D",
+                "Laplace Equation": "Persamaan Laplace 2D"
             }
             method_labels = list(method_options.values())
             method_keys = list(method_options.keys())
@@ -186,11 +187,12 @@ def sidebar():
         elif category == "PDE Solver":
             st.info("""
             **PDE Solver** menyelesaikan Persamaan Partial Differential Equation (PDE)
-            untuk analisis defleksi plat menggunakan metode finite difference:
+            untuk analisis defleksi plat dan distribusi potensial:
             
             - **Persamaan Plat Biharmonik**: Menghitung defleksi plat tebal under beban
-            - Solver iteratif: Jacobi dan Gauss-Seidel
-            - Visualisasi 3D dan kontur defleksi
+            - **Persamaan Laplace 2D**: Distribusi suhu, potensial elektrostatik, aliran fluida
+            - Solver iteratif: Jacobi, Gauss-Seidel, dan SOR
+            - Visualisasi 3D dan kontur
             
             Pilih metode solver dan parameter grid untuk perhitungan!
             """)
