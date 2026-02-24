@@ -12,6 +12,8 @@ def input_form(category, method):
         return input_integration(method)
     elif category == "Interpolation":
         return input_interpolation(method)
+    elif category == "Linear System":
+        return input_linear_system(method)
     elif category == "Series":
         return input_series(method)
     elif category == "Analysis Features":
@@ -411,6 +413,87 @@ def input_interpolation(method):
             'x_eval': x_eval
         }
     
+    return None
+
+
+def _default_linear_system(n):
+    """
+    Default example system for Ax=b input grid.
+    """
+    A = np.eye(n, dtype=float)
+    b = np.ones(n, dtype=float)
+
+    if n >= 3:
+        A[:3, :3] = np.array([
+            [2.0, -1.0, 1.0],
+            [3.0, 3.0, 9.0],
+            [3.0, 3.0, 5.0]
+        ])
+        b[:3] = np.array([2.0, -1.0, 4.0])
+    elif n == 2:
+        A[:2, :2] = np.array([
+            [2.0, -1.0],
+            [3.0, 3.0]
+        ])
+        b[:2] = np.array([2.0, -1.0])
+
+    return A, b
+
+
+def input_linear_system(method):
+    st.markdown("#### Masukkan Parameter Sistem Persamaan Linear (Ax = b)")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        n = int(st.number_input(
+            "Ukuran sistem (n x n)",
+            value=3,
+            min_value=2,
+            max_value=8
+        ))
+    with col2:
+        tol = st.number_input(
+            "Toleransi pivot",
+            value=1e-12,
+            format="%.1e",
+            min_value=1e-15,
+            max_value=1e-3,
+            help="Batas untuk mendeteksi pivot nol/singular"
+        )
+
+    show_steps = st.checkbox("Tampilkan langkah eliminasi", value=True)
+
+    default_A, default_b = _default_linear_system(n)
+    st.markdown("#### Matriks A dan Vektor b")
+    st.caption("Isi koefisien matriks A dan ruas kanan b untuk setiap persamaan.")
+
+    A = np.zeros((n, n), dtype=float)
+    b = np.zeros(n, dtype=float)
+
+    for i in range(n):
+        cols = st.columns(n + 1)
+        for j in range(n):
+            A[i, j] = cols[j].number_input(
+                f"a{i + 1}{j + 1}",
+                value=float(default_A[i, j]),
+                key=f"linear_{method}_a_{n}_{i}_{j}",
+                format="%.6f"
+            )
+        b[i] = cols[-1].number_input(
+            f"b{i + 1}",
+            value=float(default_b[i]),
+            key=f"linear_{method}_b_{n}_{i}",
+            format="%.6f"
+        )
+
+    if st.button(f"Selesaikan dengan {method}", use_container_width=True, type="primary"):
+        return {
+            'A': A,
+            'b': b,
+            'tol': tol,
+            'show_steps': show_steps
+        }
+
     return None
 
 def input_series(method):

@@ -6,6 +6,7 @@ Memisahkan display logic dari app.py untuk better modularity.
 from .root_finding_display import display_root_finding_results
 from .integration_display import display_integration_results
 from .interpolation_display import display_interpolation_results
+from .linear_system_display import display_linear_system_results
 from .series_display import display_taylor_results, display_ode_results
 from .analysis_display import (
     display_true_value_results,
@@ -22,6 +23,7 @@ __all__ = [
     'display_root_finding_results',
     'display_integration_results',
     'display_interpolation_results',
+    'display_linear_system_results',
     'display_taylor_results',
     'display_ode_results',
     'display_true_value_results',

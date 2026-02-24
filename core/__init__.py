@@ -15,6 +15,7 @@ from . import series
 from . import analysis
 from . import differentiation
 from . import errors
+from . import linear_systems
 from . import utils
 
 __all__ = [
@@ -25,5 +26,6 @@ __all__ = [
     'analysis',
     'differentiation',
     'errors',
+    'linear_systems',
     'utils'
 ]

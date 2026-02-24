@@ -7,6 +7,7 @@ from ui.displays import (
     display_root_finding_results,
     display_integration_results,
     display_interpolation_results,
+    display_linear_system_results,
     display_taylor_results,
     display_ode_results,
     display_true_value_results,
@@ -36,6 +37,10 @@ from core.integration.simpson import simpson_method
 # Interpolation methods
 from core.interpolation.lagrange import lagrange_interpolation
 from core.interpolation.newton import newton_interpolation
+
+# Linear system methods
+from core.linear_systems.gaussian_elimination import gaussian_elimination
+from core.linear_systems.gauss_jordan import gauss_jordan_elimination
 
 # Series methods
 from core.series.taylor_series import taylor_series, euler_method, taylor_ode_order2, runge_kutta_method
@@ -97,6 +102,47 @@ def main():
     
     # For other methods, use input_form
     params = input_form(category, method)
+
+    # Keep linear-system result persistent across reruns
+    # so selecting elimination steps does not clear the solution view.
+    if "linear_system_cache" not in st.session_state:
+        st.session_state["linear_system_cache"] = {}
+
+    if category == "Linear System":
+        cache_key = method
+
+        if params:
+            try:
+                if method == "Gaussian Elimination":
+                    result = gaussian_elimination(
+                        params["A"], params["b"], params["tol"]
+                    )
+                elif method == "Gauss-Jordan":
+                    result = gauss_jordan_elimination(
+                        params["A"], params["b"], params["tol"]
+                    )
+                else:
+                    raise ValueError(f"Metode linear system tidak didukung: {method}")
+
+                st.session_state["linear_system_cache"][cache_key] = {
+                    "result": result,
+                    "params": {
+                        "A": params["A"].copy(),
+                        "b": params["b"].copy(),
+                        "tol": params["tol"],
+                        "show_steps": params.get("show_steps", True),
+                    },
+                }
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+                st.exception(e)
+
+        cached = st.session_state["linear_system_cache"].get(cache_key)
+        if cached:
+            if not params:
+                st.caption("Menampilkan hasil terakhir. Klik tombol solve jika input diubah.")
+            display_linear_system_results(cached["result"], cached["params"], method)
+        return
     
     if params:
         try:
@@ -159,7 +205,7 @@ def main():
                     display_interpolation_results(
                         y_eval, None, poly_str, params, method, div_diff_table
                     )
-            
+
             # SERIES METHODS
             elif category == "Series":
                 if method == "Taylor":

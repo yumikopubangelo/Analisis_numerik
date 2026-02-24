@@ -15,7 +15,7 @@ def sidebar():
         st.markdown("### Pilih Kategori")
         category = st.selectbox(
             "Kategori Metode",
-            ["Root Finding", "Integration", "Interpolation", "Series", "Analysis Features", "Differentiation", "PDE Solver"],
+            ["Root Finding", "Integration", "Interpolation", "Linear System", "Series", "Analysis Features", "Differentiation", "PDE Solver"],
             label_visibility="collapsed"
         )
         
@@ -62,6 +62,21 @@ def sidebar():
             method_labels = list(method_options.values())
             method_keys = list(method_options.keys())
             
+            selected_label = st.radio(
+                "Metode",
+                method_labels,
+                label_visibility="collapsed"
+            )
+            method = method_keys[method_labels.index(selected_label)]
+
+        elif category == "Linear System":
+            method_options = {
+                "Gaussian Elimination": "Eliminasi Gauss",
+                "Gauss-Jordan": "Gauss-Jordan"
+            }
+            method_labels = list(method_options.values())
+            method_keys = list(method_options.keys())
+
             selected_label = st.radio(
                 "Metode",
                 method_labels,
@@ -165,7 +180,15 @@ def sidebar():
             
             Berguna untuk estimasi nilai di antara data points.
             """)
-        
+
+        elif category == "Linear System":
+            st.info("""
+            **Linear System (Ax = b)** digunakan untuk menyelesaikan sistem persamaan linear.
+
+            - **Eliminasi Gauss**: eliminasi maju + substitusi balik
+            - **Gauss-Jordan**: eliminasi penuh hingga bentuk eselon tereduksi (RREF)
+            """)
+
         elif category == "Series":
             st.info("""
             **Deret Taylor** mengaproksimasi fungsi dengan polinomial di sekitar titik tertentu.
